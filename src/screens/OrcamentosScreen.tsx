@@ -1,10 +1,11 @@
 // src/screens/OrcamentosScreen.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert,
-  TextInput, Share,
+  TextInput, Share, Animated,
 } from 'react-native';
 import { useAppStore } from '../store/appStore';
+import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/Toast';
 import { Button, Card, EmptyState, LoadingOverlay, Divider, Input } from '../components/UI';
 import { colors, spacing, radius, fontSize } from '../lib/theme';
@@ -15,8 +16,31 @@ const EMPTY_ITEM = (): QuoteItem => ({ descricao: '', quantidade: 1, valorUnitar
 
 type Screen = 'list' | 'form' | 'view';
 
+// ── Borda animada azul (igual PDF/Word/Excluir) ─────────────────────────────
+function AnimatedBorder({ children, style }: { children: React.ReactNode; style?: any }) {
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(anim, { toValue: 1, duration: 1500, useNativeDriver: false }),
+        Animated.timing(anim, { toValue: 0, duration: 1500, useNativeDriver: false }),
+      ])
+    ).start();
+  }, []);
+  const borderColor = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['rgba(13,125,224,0.2)', 'rgba(13,125,224,0.9)'],
+  });
+  return (
+    <Animated.View style={[style, { borderWidth: 1.5, borderRadius: radius.sm, borderColor }]}>
+      {children}
+    </Animated.View>
+  );
+}
+
 export default function OrcamentosScreen() {
   const { quotes, issuers, clients, isLoading, loadAll, saveQuote, deleteQuote } = useAppStore();
+  const { planStatus } = useAuth();
   const { showToast } = useToast();
 
   const [screen, setScreen] = useState<Screen>('list');
@@ -102,6 +126,19 @@ export default function OrcamentosScreen() {
   }
 
   async function handleShare(q: Quote) {
+    // Admin e premium compartilham o link do PDF gerado no sistema web
+    const canPdf = planStatus === 'admin' || planStatus === 'premium' || planStatus === 'trial';
+    if (canPdf) {
+      // Compartilha o link direto do orçamento em PDF (igual à web)
+      const shareUrl = `https://geradororcamentosoftprime.com.br/orcamento/${q.id}`;
+      await Share.share({
+        message: `📄 Orçamento #${q.numero}\nhttps://geradororcamentosoftprime.com.br/orcamento/${q.id}`,
+        url: shareUrl,
+        title: `Orçamento #${q.numero}`,
+      });
+      return;
+    }
+    // Fallback texto para plano expirado
     const issuer = issuers.find(i => i.id === q.issuerId);
     const client = clients.find(c => c.id === q.clientId);
     const lines = [
@@ -118,6 +155,9 @@ export default function OrcamentosScreen() {
     ].filter(l => l !== undefined).join('\n');
     await Share.share({ message: lines, title: `Orçamento #${q.numero}` });
   }
+
+  // Acesso total: admin, premium ou trial ativo
+  const hasFullAccess = planStatus === 'admin' || planStatus === 'premium' || planStatus === 'trial';
 
   // ── VIEW SCREEN ───────────────────────────────────────────────
   if (screen === 'view' && viewQuote) {
@@ -363,26 +403,51 @@ export default function OrcamentosScreen() {
                 {/* Botões de ação — iguais ao web */}
                 <Divider style={{ marginVertical: spacing.sm }} />
                 <View style={styles.quoteActions}>
-                  <TouchableOpacity style={styles.qBtn} onPress={() => openView(q)}>
-                    <Text style={styles.qBtnText}>👁️ Ver</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.qBtn, styles.qBtnBlue]}
-                    onPress={() => showToast('PDF disponível no plano Pro/Premium', 'info')}>
-                    <Text style={[styles.qBtnText, { color: colors.primary }]}>📄 PDF</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.qBtn, styles.qBtnBlue]}
-                    onPress={() => showToast('Word disponível no plano Premium', 'info')}>
-                    <Text style={[styles.qBtnText, { color: colors.primary }]}>📝 Word</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.qBtn} onPress={() => handleShare(q)}>
-                    <Text style={styles.qBtnText}>🔗 Compartilhar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.qBtn} onPress={() => startEdit(q)}>
-                    <Text style={styles.qBtnText}>✏️ Editar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.qBtn, styles.qBtnDanger]} onPress={() => confirmDelete(q)}>
-                    <Text style={[styles.qBtnText, { color: colors.danger }]}>🗑️</Text>
-                  </TouchableOpacity>
+                  <AnimatedBorder style={{ backgroundColor: colors.white }}>
+                    <TouchableOpacity style={styles.qBtnInner} onPress={() => openView(q)}>
+                      <Text style={styles.qBtnText}>👁️ Ver</Text>
+                    </TouchableOpacity>
+                  </AnimatedBorder>
+                  <AnimatedBorder style={{ backgroundColor: '#eff6ff' }}>
+                    <TouchableOpacity style={styles.qBtnInner}
+                      onPress={() => {
+                        if (hasFullAccess) {
+                          const pdfUrl = `https://geradororcamentosoftprime.com.br/orcamento/${q.id}`;
+                          Share.share({ message: `📄 PDF do Orçamento #${q.numero}\n${pdfUrl}`, url: pdfUrl });
+                        } else {
+                          showToast('PDF disponível no plano Pro/Premium', 'info');
+                        }
+                      }}>
+                      <Text style={[styles.qBtnText, { color: colors.primary }]}>📄 PDF</Text>
+                    </TouchableOpacity>
+                  </AnimatedBorder>
+                  <AnimatedBorder style={{ backgroundColor: '#eff6ff' }}>
+                    <TouchableOpacity style={styles.qBtnInner}
+                      onPress={() => {
+                        if (hasFullAccess) {
+                          showToast('Exportando Word...', 'info');
+                        } else {
+                          showToast('Word disponível no plano Premium', 'info');
+                        }
+                      }}>
+                      <Text style={[styles.qBtnText, { color: colors.primary }]}>📝 Word</Text>
+                    </TouchableOpacity>
+                  </AnimatedBorder>
+                  <AnimatedBorder style={{ backgroundColor: colors.white }}>
+                    <TouchableOpacity style={styles.qBtnInner} onPress={() => handleShare(q)}>
+                      <Text style={styles.qBtnText}>🔗 Compartilhar</Text>
+                    </TouchableOpacity>
+                  </AnimatedBorder>
+                  <AnimatedBorder style={{ backgroundColor: colors.white }}>
+                    <TouchableOpacity style={styles.qBtnInner} onPress={() => startEdit(q)}>
+                      <Text style={styles.qBtnText}>✏️ Editar</Text>
+                    </TouchableOpacity>
+                  </AnimatedBorder>
+                  <AnimatedBorder style={{ backgroundColor: '#fff5f5' }}>
+                    <TouchableOpacity style={styles.qBtnInner} onPress={() => confirmDelete(q)}>
+                      <Text style={[styles.qBtnText, { color: colors.danger }]}>🗑️</Text>
+                    </TouchableOpacity>
+                  </AnimatedBorder>
                 </View>
               </Card>
             );
@@ -433,6 +498,10 @@ const styles = StyleSheet.create({
   },
   quoteTotal: { color: colors.primary, fontWeight: '800', fontSize: fontSize.sm },
   quoteActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  qBtnInner: {
+    paddingHorizontal: 10, paddingVertical: 6,
+    backgroundColor: 'transparent',
+  },
   qBtn: {
     paddingHorizontal: 10, paddingVertical: 6, borderRadius: radius.sm,
     borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white,
