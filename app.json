@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SoftPrime Orçamentos",
-    "slug": "softprime-app",
+    "slug": "orcamento-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,7 +20,10 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0d7de0"
       },
-      "package": "br.com.softprime.orcamentos"
+      "package": "br.com.softprime.orcamentos",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -45,6 +48,7 @@
     },
     "router": {
       "origin": false
-    }
+    },
+    "owner": "gustavoaraujo12"
   }
 }
