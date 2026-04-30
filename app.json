@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "SoftPrime Orçamentos",
+    "slug": "softprime-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0d7de0"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "br.com.softprime.orcamentos"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0d7de0"
+      },
+      "package": "br.com.softprime.orcamentos"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app precisa acessar sua galeria para adicionar logotipo ao emissor."
+        }
+      ]
+    ],
+    "scheme": "softprime",
+    "extra": {
+      "SUPABASE_URL": "https://eyvdyhpdahkplapltaut.supabase.co",
+      "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5dmR5aHBkYWhrcGxhcGx0YXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMzQxNTMsImV4cCI6MjA4NzYxMDE1M30.4bQ0J65OdXlpSn85uH07fLGPZCwGbTo1-WoltBLrS5Q"
+    },
+    "router": {
+      "origin": false
+    }
+  }
+}
