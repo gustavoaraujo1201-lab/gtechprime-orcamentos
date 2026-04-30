@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert,
-  TextInput, Share, Animated,
+  TextInput, Share, Animated, Modal, FlatList, Platform,
 } from 'react-native';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../hooks/useAuth';
@@ -35,6 +35,64 @@ function AnimatedBorder({ children, style }: { children: React.ReactNode; style?
     <Animated.View style={[style, { borderWidth: 1.5, borderRadius: radius.sm, borderColor }]}>
       {children}
     </Animated.View>
+  );
+}
+
+// ── Dropdown Select (igual ao <select> da web) ──────────────────────────────
+type DropdownOption = { label: string; value: string };
+function DropdownSelect({
+  label, placeholder, options, value, onChange, emptyMessage,
+}: {
+  label: string; placeholder: string; options: DropdownOption[];
+  value: string; onChange: (v: string) => void; emptyMessage?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find(o => o.value === value);
+  return (
+    <View style={{ marginBottom: spacing.md }}>
+      <Text style={styles.pickerLabel}>{label}</Text>
+      <TouchableOpacity
+        style={styles.dropdownBtn}
+        onPress={() => options.length > 0 && setOpen(true)}
+        activeOpacity={0.8}
+      >
+        <Text style={[styles.dropdownBtnText, !selected && { color: colors.textWeak }]}>
+          {selected ? selected.label : (options.length === 0 ? (emptyMessage ?? placeholder) : placeholder)}
+        </Text>
+        <Text style={{ color: colors.textMuted, fontSize: 12 }}>▼</Text>
+      </TouchableOpacity>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOpen(false)}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>{label}</Text>
+            {/* Opção vazia */}
+            <TouchableOpacity
+              style={[styles.modalOption, !value && styles.modalOptionActive]}
+              onPress={() => { onChange(''); setOpen(false); }}
+            >
+              <Text style={[styles.modalOptionText, !value && styles.modalOptionTextActive]}>
+                {placeholder}
+              </Text>
+            </TouchableOpacity>
+            <FlatList
+              data={options}
+              keyExtractor={o => o.value}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.modalOption, item.value === value && styles.modalOptionActive]}
+                  onPress={() => { onChange(item.value); setOpen(false); }}
+                >
+                  <Text style={[styles.modalOptionText, item.value === value && styles.modalOptionTextActive]}>
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
   );
 }
 
@@ -266,28 +324,24 @@ export default function OrcamentosScreen() {
             <Text style={styles.cardTitle}>Informações</Text>
 
             {/* Emissor */}
-            <Text style={styles.pickerLabel}>Emissor *</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.md }}>
-              {issuers.map(i => (
-                <TouchableOpacity key={i.id} onPress={() => setForm(p => p ? { ...p, issuerId: i.id } : p)}
-                  style={[styles.chip, form.issuerId === i.id && styles.chipActive]}>
-                  <Text style={[styles.chipText, form.issuerId === i.id && styles.chipTextActive]}>{i.name}</Text>
-                </TouchableOpacity>
-              ))}
-              {issuers.length === 0 && <Text style={styles.emptyChip}>Nenhum emissor. Cadastre primeiro.</Text>}
-            </ScrollView>
+            <DropdownSelect
+              label="Emissor *"
+              placeholder="-- selecione o emissor --"
+              options={issuers.map(i => ({ label: i.name, value: i.id }))}
+              value={form.issuerId}
+              onChange={v => setForm(p => p ? { ...p, issuerId: v } : p)}
+              emptyMessage="Nenhum emissor. Cadastre primeiro."
+            />
 
             {/* Cliente */}
-            <Text style={styles.pickerLabel}>Cliente *</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.md }}>
-              {clients.map(c => (
-                <TouchableOpacity key={c.id} onPress={() => setForm(p => p ? { ...p, clientId: c.id } : p)}
-                  style={[styles.chip, form.clientId === c.id && styles.chipActive]}>
-                  <Text style={[styles.chipText, form.clientId === c.id && styles.chipTextActive]}>{c.name}</Text>
-                </TouchableOpacity>
-              ))}
-              {clients.length === 0 && <Text style={styles.emptyChip}>Nenhum cliente. Cadastre primeiro.</Text>}
-            </ScrollView>
+            <DropdownSelect
+              label="Cliente *"
+              placeholder="-- selecione o cliente --"
+              options={clients.map(c => ({ label: c.name, value: c.id }))}
+              value={form.clientId}
+              onChange={v => setForm(p => p ? { ...p, clientId: v } : p)}
+              emptyMessage="Nenhum cliente. Cadastre primeiro."
+            />
 
             <Input label="Número do Orçamento" placeholder="2026-0001"
               value={form.numero} onChangeText={v => setForm(p => p ? { ...p, numero: v } : p)} />
@@ -509,6 +563,36 @@ const styles = StyleSheet.create({
   qBtnBlue: { borderColor: '#bfdbfe', backgroundColor: '#eff6ff' },
   qBtnDanger: { borderColor: '#fecaca', backgroundColor: '#fff5f5' },
   qBtnText: { fontSize: 12, fontWeight: '600', color: colors.text },
+
+  dropdownBtn: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md,
+    paddingHorizontal: 12, paddingVertical: 12, backgroundColor: colors.white,
+    marginBottom: 0,
+  },
+  dropdownBtnText: { fontSize: fontSize.sm, color: colors.text, flex: 1 },
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  modalBox: {
+    backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden',
+    maxHeight: 360, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 12,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: fontSize.md, fontWeight: '700', color: colors.text,
+    paddingHorizontal: 16, paddingVertical: 14,
+    borderBottomWidth: 1, borderBottomColor: colors.border,
+    backgroundColor: colors.background,
+  },
+  modalOption: {
+    paddingHorizontal: 16, paddingVertical: 14,
+    borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  modalOptionActive: { backgroundColor: colors.primaryLight },
+  modalOptionText: { fontSize: fontSize.sm, color: colors.text },
+  modalOptionTextActive: { color: colors.primary, fontWeight: '700' },
 
   pickerLabel: { fontSize: fontSize.sm, fontWeight: '600', color: colors.text, marginBottom: spacing.xs },
   chip: {
