@@ -10,7 +10,6 @@ const TAB_BORDER = 'rgba(13,125,224,0.18)';
 export default function TabsLayout() {
   return (
     <Tabs
-      // ✅ Força a aba "index" (Início) como tela inicial sempre
       initialRouteName="index"
       screenOptions={{
         headerShown: false,
@@ -36,11 +35,12 @@ export default function TabsLayout() {
         },
       }}
     >
-      {/* ── ABA: INÍCIO — deve ser a primeira ── */}
+      {/* ── ABA: INÍCIO — primeira e padrão ── */}
       <Tabs.Screen
         name="index"
         options={{
           title: 'Início',
+          href: '/(tabs)/',
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="🏠" color={color} size={size} />
           ),
@@ -52,6 +52,7 @@ export default function TabsLayout() {
         name="cadastro"
         options={{
           title: 'Cadastros',
+          href: '/(tabs)/cadastro',
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="📋" color={color} size={size} />
           ),
@@ -63,6 +64,7 @@ export default function TabsLayout() {
         name="orcamentos"
         options={{
           title: 'Orçamentos',
+          href: '/(tabs)/orcamentos',
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="📄" color={color} size={size} />
           ),
@@ -74,6 +76,7 @@ export default function TabsLayout() {
         name="perfil"
         options={{
           title: 'Perfil',
+          href: '/(tabs)/perfil',
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="👤" color={color} size={size} />
           ),
