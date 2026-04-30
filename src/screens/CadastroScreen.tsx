@@ -1,14 +1,16 @@
 // src/screens/CadastroScreen.tsx
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Image,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useAppStore } from '../store/appStore';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../components/Toast';
 import { Button, Input, Card, EmptyState, LoadingOverlay, Divider } from '../components/UI';
 import { colors, spacing, radius, fontSize } from '../lib/theme';
 import { uid } from '../lib/utils';
+import { supabase } from '../lib/supabase';
 import type { Issuer, Client } from '../types';
 
 type ActiveTab = 'emissores' | 'clientes';
@@ -27,6 +29,39 @@ export default function CadastroScreen() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { loadAll(); }, []);
+
+  async function handlePickLogo() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão necessária', 'Permita acesso à galeria nas configurações.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true, aspect: [4, 2], quality: 0.8,
+    });
+    if (result.canceled || !result.assets[0]) return;
+
+    const uri = result.assets[0].uri;
+    const ext = uri.split('.').pop() ?? 'jpg';
+    const fileName = `logo_${Date.now()}.${ext}`;
+
+    const formData = new FormData();
+    formData.append('file', { uri, name: fileName, type: `image/${ext}` } as any);
+
+    const { error } = await supabase.storage
+      .from('logos').upload(fileName, formData, { upsert: true, contentType: `image/${ext}` });
+
+    if (error) {
+      // Se não tiver bucket, salva o URI local
+      setIssuerForm(p => p ? { ...p, logo: uri } : p);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+    setIssuerForm(p => p ? { ...p, logo: urlData.publicUrl } : p);
+    showToast('Logo adicionado!', 'success');
+  }
 
   async function handleSaveIssuer() {
     if (!issuerForm?.name.trim()) { showToast('Nome é obrigatório', 'error'); return; }
@@ -136,6 +171,26 @@ export default function CadastroScreen() {
                 value={issuerForm?.address ?? ''}
                 onChangeText={v => setIssuerForm(p => ({ ...(p ?? EMPTY_ISSUER()), address: v }))}
                 multiline numberOfLines={2} style={{ height: 60, textAlignVertical: 'top' }} />
+
+              {/* Logotipo */}
+              <Text style={styles.logoLabel}>🖼️ Logotipo do Emissor</Text>
+              <Text style={styles.logoHint}>Imagem até 4mb (PNG, JPG)</Text>
+              <View style={styles.logoRow}>
+                <TouchableOpacity style={styles.logoBtn} onPress={handlePickLogo}>
+                  <Text style={styles.logoBtnText}>📁 Escolher arquivo</Text>
+                </TouchableOpacity>
+                {issuerForm?.logo ? (
+                  <View style={styles.logoPreviewWrap}>
+                    <Image source={{ uri: issuerForm.logo }} style={styles.logoPreview} resizeMode="contain" />
+                    <TouchableOpacity onPress={() => setIssuerForm(p => p ? { ...p, logo: null } : p)}>
+                      <Text style={styles.logoRemove}>✕ Remover</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Text style={styles.logoEmpty}>Nenhum arquivo escolhido</Text>
+                )}
+              </View>
+
               <View style={styles.formRow}>
                 {issuerForm?.createdAt && (
                   <Button label="Cancelar" variant="outline" onPress={() => setIssuerForm(null)} style={{ flex: 1 }} />
@@ -154,6 +209,9 @@ export default function CadastroScreen() {
                     {idx > 0 && <Divider />}
                     <View style={styles.listItem}>
                       <View style={{ flex: 1 }}>
+                        {!!i.logo && (
+                          <Image source={{ uri: i.logo }} style={styles.listLogo} resizeMode="contain" />
+                        )}
                         <Text style={styles.itemName}>{i.name}</Text>
                         {!!i.cnpjCpf && <Text style={styles.itemMeta}>CNPJ/CPF: {i.cnpjCpf}</Text>}
                         {!!i.phone && <Text style={styles.itemMeta}>Tel: {i.phone}</Text>}
@@ -282,4 +340,18 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#fecaca', backgroundColor: '#fff5f5',
   },
   deleteBtnText: { fontSize: 12, fontWeight: '600', color: colors.danger },
+
+  listLogo: { width: 100, height: 40, marginBottom: 6, borderRadius: 4 },
+  logoLabel: { fontSize: fontSize.sm, fontWeight: '600', color: colors.text, marginBottom: 2, marginTop: spacing.sm },
+  logoHint:  { fontSize: fontSize.xs, color: colors.textMuted, marginBottom: spacing.sm },
+  logoRow:   { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap', marginBottom: spacing.sm },
+  logoBtn: {
+    paddingHorizontal: 14, paddingVertical: 9, borderRadius: radius.md,
+    borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.white,
+  },
+  logoBtnText:  { fontSize: fontSize.sm, fontWeight: '600', color: colors.text },
+  logoEmpty:    { fontSize: fontSize.sm, color: colors.textWeak },
+  logoPreviewWrap: { alignItems: 'center', gap: 4 },
+  logoPreview: { width: 120, height: 60, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border },
+  logoRemove:  { fontSize: fontSize.xs, color: colors.danger, fontWeight: '600', marginTop: 4 },
 });
