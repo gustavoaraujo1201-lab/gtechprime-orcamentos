@@ -154,7 +154,7 @@ export default function LoginScreen() {
 
             {/* ── Logo ── */}
             <View style={s.header}>
-              <Text style={s.logo}>SOFT<Text style={s.prime}>PRIME</Text></Text>
+              <Text style={s.logo}>GTech<Text style={s.prime}>PRIME</Text></Text>
               <Text style={s.sub}>Gerador de Orçamentos — Faça login ou crie sua conta</Text>
             </View>
 
@@ -283,7 +283,7 @@ export default function LoginScreen() {
 
             {/* Footer */}
             <View style={s.footer}>
-              <Text style={s.footTxt}>© 2026 SoftPrime — Todos os direitos reservados</Text>
+              <Text style={s.footTxt}>© 2026 GTech Prime — Todos os direitos reservados</Text>
             </View>
 
           </Animated.View>

@@ -30,7 +30,7 @@ function TrialExpiredScreen() {
         <Text style={b.emoji}>⏰</Text>
         <Text style={b.title}>Seu período gratuito{'\n'}encerrou</Text>
         <Text style={b.sub}>
-          Você utilizou os 7 dias grátis do SoftPrime.{'\n'}
+          Você utilizou os 7 dias grátis do GTech Prime.{'\n'}
           Para continuar gerando orçamentos, escolha um plano.
         </Text>
         <View style={b.features}>
@@ -55,7 +55,7 @@ function TrialExpiredScreen() {
         <TouchableOpacity style={b.btnCta} activeOpacity={0.85} onPress={() => Linking.openURL(PLANS_URL)}>
           <Text style={b.btnCtaText}>Ver planos e assinar →</Text>
         </TouchableOpacity>
-        <Text style={b.footer}>© 2026 SoftPrime</Text>
+        <Text style={b.footer}>© 2026 GTech Prime</Text>
       </View>
     </View>
   );

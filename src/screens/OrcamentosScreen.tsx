@@ -188,9 +188,9 @@ export default function OrcamentosScreen() {
     const canPdf = planStatus === 'admin' || planStatus === 'premium' || planStatus === 'trial';
     if (canPdf) {
       // Compartilha o link direto do orçamento em PDF (igual à web)
-      const shareUrl = `https://geradororcamentosoftprime.com.br/orcamento/${q.id}`;
+      const shareUrl = `https://app.gtechprime.com.br/orcamento/${q.id}`;
       await Share.share({
-        message: `📄 Orçamento #${q.numero}\nhttps://geradororcamentosoftprime.com.br/orcamento/${q.id}`,
+        message: `📄 Orçamento #${q.numero}\nhttps://app.gtechprime.com.br/orcamento/${q.id}`,
         url: shareUrl,
         title: `Orçamento #${q.numero}`,
       });
@@ -466,7 +466,7 @@ export default function OrcamentosScreen() {
                     <TouchableOpacity style={styles.qBtnInner}
                       onPress={() => {
                         if (hasFullAccess) {
-                          const pdfUrl = `https://geradororcamentosoftprime.com.br/orcamento/${q.id}`;
+                          const pdfUrl = `https://app.gtechprime.com.br/orcamento/${q.id}`;
                           Share.share({ message: `📄 PDF do Orçamento #${q.numero}\n${pdfUrl}`, url: pdfUrl });
                         } else {
                           showToast('PDF disponível no plano Pro/Premium', 'info');

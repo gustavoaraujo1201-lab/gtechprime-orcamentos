@@ -8,7 +8,7 @@ const ADMIN_EMAILS = [
 ];
 
 const TRIAL_DAYS = 7;
-const PLANS_URL  = 'https://geradororcamentosoftprime.com.br/planos';
+const PLANS_URL  = 'https://app.gtechprime.com.br/planos';
 
 export type PlanStatus = 'admin' | 'premium' | 'trial' | 'trial_expired' | 'loading';
 

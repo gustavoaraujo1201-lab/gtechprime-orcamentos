@@ -9,7 +9,7 @@ import { useAuth } from '../../src/hooks/useAuth';
 import { useRouter } from 'expo-router';
 
 const PRIMARY    = '#0d7de0';
-const PLANS_URL  = 'https://geradororcamentosoftprime.com.br/planos';
+const PLANS_URL  = 'https://app.gtechprime.com.br/planos';
 
 export default function InicioScreen() {
   const [stats, setStats]     = useState({ emissores: 0, clientes: 0, orcamentos: 0 });
@@ -99,7 +99,7 @@ export default function InicioScreen() {
         <View style={styles.bannerTop}>
           <View style={{ flex: 1 }}>
             <Text style={styles.bannerGreeting}>Olá, {displayName} 👋</Text>
-            <Text style={styles.bannerSub}>Bem-vindo ao SoftPrime — Gerador de Orçamentos</Text>
+            <Text style={styles.bannerSub}>Bem-vindo ao GTech Prime — Gerador de Orçamentos</Text>
           </View>
           <TouchableOpacity style={styles.sairBtn} onPress={confirmarSair} activeOpacity={0.8}>
             <Text style={styles.sairText}>⎋ Sair</Text>
@@ -137,7 +137,7 @@ export default function InicioScreen() {
         <ActionCard emoji="👤" title="Meu Perfil"        subtitle="Configurações da conta" onPress={() => router.push('/(tabs)/perfil')} />
       </View>
 
-      <Text style={styles.footer}>SoftPrime © 2026</Text>
+      <Text style={styles.footer}>GTech Prime © 2026</Text>
     </ScrollView>
   );
 }

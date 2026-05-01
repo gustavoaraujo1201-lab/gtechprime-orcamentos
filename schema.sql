@@ -1,5 +1,5 @@
 -- ============================================================
--- SoftPrime Orçamentos — Schema do banco de dados (Supabase)
+-- GTech Orçamentos — Schema do banco de dados (Supabase)
 -- Execute no SQL Editor do seu projeto Supabase
 -- ============================================================
 

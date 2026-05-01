@@ -10,7 +10,7 @@ import { useAuth } from '../../src/hooks/useAuth';
 import { useRouter } from 'expo-router';
 
 const PRIMARY   = '#0d7de0';
-const PLANS_URL = 'https://geradororcamentosoftprime.com.br/planos';
+const PLANS_URL = 'https://app.gtechprime.com.br/planos';
 
 export default function PerfilScreen() {
   const [user,        setUser]        = useState<any>(null);
@@ -262,7 +262,7 @@ export default function PerfilScreen() {
         <Text style={s.btnLogoutText}>🚪  Sair da conta</Text>
       </TouchableOpacity>
 
-      <Text style={s.footer}>SoftPrime © 2026</Text>
+      <Text style={s.footer}>GTech Prime © 2026</Text>
     </ScrollView>
   );
 }
