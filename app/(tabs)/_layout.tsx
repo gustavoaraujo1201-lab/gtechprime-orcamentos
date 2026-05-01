@@ -40,7 +40,6 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Início',
-          href: '/(tabs)/',
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="🏠" color={color} size={size} />
           ),
@@ -52,7 +51,6 @@ export default function TabsLayout() {
         name="cadastro"
         options={{
           title: 'Cadastros',
-          href: '/(tabs)/cadastro',
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="📋" color={color} size={size} />
           ),
@@ -64,7 +62,6 @@ export default function TabsLayout() {
         name="orcamentos"
         options={{
           title: 'Orçamentos',
-          href: '/(tabs)/orcamentos',
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="📄" color={color} size={size} />
           ),
@@ -76,7 +73,6 @@ export default function TabsLayout() {
         name="perfil"
         options={{
           title: 'Perfil',
-          href: '/(tabs)/perfil',
           tabBarIcon: ({ color, size }) => (
             <TabIcon emoji="👤" color={color} size={size} />
           ),

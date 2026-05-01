@@ -8,9 +8,8 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { ToastProvider } from '../src/components/Toast';
 import { useAuth } from '../src/hooks/useAuth';
 
-const PLANS_URL = 'https://geradororcamentosoftprime.com.br/planos';
+const PLANS_URL = 'https://app.gtechprime.com.br/planos';
 
-// ─── Loading enquanto verifica sessão ────────────────────────────────────────
 function LoadingScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: '#020918', justifyContent: 'center', alignItems: 'center' }}>
@@ -19,7 +18,6 @@ function LoadingScreen() {
   );
 }
 
-// ─── Tela de bloqueio trial expirado ─────────────────────────────────────────
 function TrialExpiredScreen() {
   return (
     <View style={b.root}>
@@ -61,14 +59,12 @@ function TrialExpiredScreen() {
   );
 }
 
-// ─── Gate principal ───────────────────────────────────────────────────────────
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, planStatus } = useAuth();
   const segments = useSegments();
   const router   = useRouter();
 
   useEffect(() => {
-    // Só age depois que o auth terminou de carregar
     if (isLoading) return;
 
     const inAuth = segments[0] === '(auth)';
@@ -76,17 +72,13 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated && !inAuth) {
       router.replace('/(auth)/login');
     } else if (isAuthenticated && inAuth) {
-      // ✅ SEMPRE vai para Início — nunca para cadastro
-      router.replace('/(tabs)/');
+      // ✅ Força sempre para a tela INÍCIO (index)
+      router.replace('/(tabs)/index');
     }
   }, [isAuthenticated, isLoading]);
-  // ↑ "segments" removido das dependências propositalmente:
-  //   sem isso, navegar entre abas re-dispara o efeito e pode redirecionar
 
-  // ✅ Bloqueia renderização das tabs até auth estar pronto
   if (isLoading) return <LoadingScreen />;
 
-  // Trial expirado → tela de bloqueio total
   if (isAuthenticated && planStatus === 'trial_expired') {
     return <TrialExpiredScreen />;
   }
@@ -94,7 +86,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// ─── Root layout ──────────────────────────────────────────────────────────────
 export default function RootLayout() {
   return (
     <ToastProvider>
@@ -105,7 +96,6 @@ export default function RootLayout() {
   );
 }
 
-// ─── Estilos ──────────────────────────────────────────────────────────────────
 const b = StyleSheet.create({
   root: {
     flex: 1, justifyContent: 'center', alignItems: 'center',
