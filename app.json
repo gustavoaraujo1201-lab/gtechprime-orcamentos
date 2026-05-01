@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SoftPrime Orçamentos",
+    "name": "GTech Orçamentos",
     "slug": "orcamento-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,14 +13,14 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "br.com.softprime.orcamentos"
+      "bundleIdentifier": "br.com.gtechprime.orcamentos"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0d7de0"
       },
-      "package": "br.com.softprime.orcamentos",
+      "package": "br.com.gtechprime.orcamentos",
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ]
@@ -38,7 +38,7 @@
         }
       ]
     ],
-    "scheme": "softprime",
+    "scheme": "gtechprime",
     "extra": {
       "SUPABASE_URL": "https://eyvdyhpdahkplapltaut.supabase.co",
       "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5dmR5aHBkYWhrcGxhcGx0YXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMzQxNTMsImV4cCI6MjA4NzYxMDE1M30.4bQ0J65OdXlpSn85uH07fLGPZCwGbTo1-WoltBLrS5Q",
